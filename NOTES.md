@@ -103,3 +103,9 @@ x === x
 x === y
 // res14: Boolean = false_
 ```
+
+Variance
+
+Cats prefers invariance - it's hard to set preference for which type class is applied
+But you can define type class for Option[Int], and use type annotations, i.e.  `Some(1): Option[Int]` which will result in the type class for Option[Int] to be used. You can also use smart constructors like `Option.apply` and `Option.empty`
+
