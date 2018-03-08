@@ -19,6 +19,12 @@
     - takes in instances of type class as implicit parameters
     - interface syntax enables use of methods using `.method()` syntax for existing types
   
+The companion object of every type class in Cats has an `apply` method that looks for the specified type
+
+```
+val showInt = Show.apply[Int]
+```
+  
 ## Working with implicits
 
   - `implicit` cannot be used at the top level - must be inside object or trait
