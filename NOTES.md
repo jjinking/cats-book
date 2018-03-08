@@ -109,3 +109,28 @@ Variance
 Cats prefers invariance - it's hard to set preference for which type class is applied
 But you can define type class for Option[Int], and use type annotations, i.e.  `Some(1): Option[Int]` which will result in the type class for Option[Int] to be used. You can also use smart constructors like `Option.apply` and `Option.empty`
 
+
+# Chapter 2 Monoids and Semigroups
+
+## Monoids
+
+Monoids implement two apis:
+
+- combine: (A, A) => A
+- empty: A
+
+Properties of monoid:
+
+- combine is associative
+- empty is an identity element with respect to combine
+
+### 
+
+## Semigroup
+
+Monoid w/o empty
+
+## Note: Cats Kernel
+
+Cats kernel package `cats.kernel` is a subproject of cats, aliased to `cats`
+`Eq`, `Semigroup`, and `Monoid` are in the kernel.
