@@ -7,17 +7,17 @@
 
 1) Type class itself
 
-  - trait with type parameter(s)
+    - trait with type parameter(s)
   
 2) Instances for particular types
 
-  - implicit
+    - implicit
   
 3) Interface syntax for users
 
-  - object containing functions that users can use for given typeclass
-  - takes in instances of type class as implicit parameters
-  - interface syntax enables use of methods using `.method()` syntax for existing types
+    - object containing functions that users can use for given typeclass
+    - takes in instances of type class as implicit parameters
+    - interface syntax enables use of methods using `.method()` syntax for existing types
   
 ## Working with implicits
 
