@@ -23,4 +23,23 @@ class Ch2Spec extends FlatSpec with Matchers {
     intSet1 |+| intSet1 shouldEqual intSet1
   }
 
+  it should "Section5" in {
+    import Section5._
+
+    add(List(1,2,3)) shouldEqual 6
+  }
+
+  it should "Section5Option" in {
+    import Section5Option._
+    import cats.instances.int._
+    import cats.instances.option._
+
+    add(List(Some(3), None, Some(4))) shouldEqual Option(7)
+
+    val o1 = Order(1, 2)
+    val o2 = Order(3, 4)
+    val o3 = Order(4, 6)
+    add(List(o1, o2)) shouldEqual o3
+  }
+
 }

@@ -134,3 +134,66 @@ Monoid w/o empty
 
 Cats kernel package `cats.kernel` is a subproject of cats, aliased to `cats`
 `Eq`, `Semigroup`, and `Monoid` are in the kernel.
+
+
+# Chapter 3 Functors
+
+## Section 3.2 More Examples of Functors
+
+### Referential transparency example with Futures is confusing
+
+Since scala.concurrent.Futures immediately computes, computations involving side effects will run immediately as they are encountered, and therefore it's hard to reason about Futures and computations with side-effects
+
+### Mapping over Function1 is function composition
+
+Since map doesn't actually run anything, we can think of it as lazily queueing up operations
+
+## Section 3.3 Definition of Functor
+
+Functor Laws
+
+```scala
+// Identity
+fa.map(a => a) == fa
+
+// Composition
+fa.map(g(f(_))) == fa.map(f).map(g)_)))
+```
+
+## Section 3.4 Higher kinds and type constructors
+
+### Higher Kinds
+
+Kinds are types of types, describing the number of "holes" in a type"
+
+### Type constructor
+
+```scala
+
+List    // type constructor, takes one parameter
+List[A] // type, produced using a type parameter
+
+// Analagous to
+math.abs    // function, takes one parameter
+math.abs(x) // value, produced using a value parameter
+```
+
+```scala
+// To use F[_] syntax
+import scala.language.higherKinds
+
+// or in build.sbt
+scalacOptions += "-language:higherKinds"
+```
+
+## Section 3.5 Functors in Cats
+
+```scala
+import cats.Functor
+import cats.instances.list._   // for Functor
+import cats.instances.option._ // for Functor
+```
+
+`Functor[F].lift` converts `f: A => B` to `F[A] => F[B]`
+
+Syntax
