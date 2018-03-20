@@ -196,4 +196,19 @@ import cats.instances.option._ // for Functor
 
 `Functor[F].lift` converts `f: A => B` to `F[A] => F[B]`
 
-Syntax
+### Syntax
+
+`Options` and `Lists` have their own builtin `map` function, which the scala compiler prefers
+
+```scala
+import cats.instances.function._ // for Functor
+import cats.syntax.functor._     // for map
+
+val func1 = (a: Int) => a + 1
+val func2 = (a: Int) => a * 2
+val func3 = (a: Int) => a + "!"
+val func4 = func1.map(func2).map(func3)
+
+func4(123)
+// res1: String = 248!
+```
