@@ -7,17 +7,25 @@
 
 1) Type class itself
 
-  - trait with type parameter(s)
+    - trait with type parameter(s)
   
 2) Instances for particular types
 
-  - implicit
+    - implicit
   
 3) Interface syntax for users
 
-  - object containing functions that users can use for given typeclass
-  - takes in instances of type class as implicit parameters
-  - interface syntax enables use of methods using `.method()` syntax for existing types
+    - object containing functions that users can use for given typeclass
+    - takes in instances of type class as implicit parameters
+    - interface syntax enables use of methods using `.method()` syntax for existing types
+  
+The companion object of every type class in Cats has an `apply` method that looks for the specified type, which needs to be in scope
+
+```
+import cats.instances.int._
+
+val showInt = Show.apply[Int]
+```
   
 ## Working with implicits
 
