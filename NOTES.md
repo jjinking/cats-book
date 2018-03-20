@@ -220,3 +220,11 @@ val func4 = func1.map(func2).map(func3)
 func4(123)
 // res1: String = 248!
 ```
+
+## Contravariant and Invariant
+
+Prepending operations to a chain, and building Bidirectional chain of operations
+
+
+
+

@@ -5,8 +5,8 @@ import catsbook.Ch3._
 
 class Ch3Spec extends FlatSpec with Matchers {
 
-  it should "Section3 Tree Functor" in {
-    import Section3._
+  it should "Section5 Tree Functor" in {
+    import Section5._
 
     val l1 = Leaf(1)
     val l2 = Leaf(2)
@@ -39,6 +39,15 @@ class Ch3Spec extends FlatSpec with Matchers {
     // Same idea
     val root4: Tree[Int] = root
     root4.map(_ + 3) shouldEqual root2
+  }
+
+  it should "Section6 Contravariant Printable" in {
+    import Section6._
+
+    format(Box("hello world")) shouldEqual "\"hello world\""
+
+    format(Box(true)) shouldEqual "yes"
+
   }
 
 }
