@@ -50,4 +50,15 @@ class Ch3Spec extends FlatSpec with Matchers {
 
   }
 
+  it should "Section6.2 Imap" in {
+    import Section6_2._
+
+    encode(123.4) shouldEqual "123.4"
+
+    decode[Double]("123.4") shouldEqual 123.4
+
+    encode(Box(123.4)) shouldEqual "123.4"
+
+    decode[Box[Double]]("123.4") shouldEqual Box(123.4)
+  }
 }

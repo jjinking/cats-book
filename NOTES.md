@@ -219,12 +219,26 @@ val func4 = func1.map(func2).map(func3)
 
 func4(123)
 // res1: String = 248!
-```
+``
 
 ## Contravariant and Invariant
 
 Prepending operations to a chain, and building Bidirectional chain of operations
 
+**Combinators*** like `map` and `contramap` and `filter` can be used to transform one typeclass to another.
 
+```scala
+// Custom instance
+final case class Box[A](value: A)
 
+implicit def boxPrintable[A](implicit printableA: Printable[A]): Printable[Box[A]] =
+  printableA.contramap(_.value)
+```
 
+Invariant typeclasses implement `imap`, which takes in both `A => B` and `B => A`, useful for things like codecs and serializers
+
+```scala
+trait Invariant[F[_]] {
+  def imap[A, B](fa: F[A])(f: A => B)(g: B => A): F[B] 
+}
+```
