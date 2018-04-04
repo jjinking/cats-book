@@ -1,5 +1,5 @@
 
-# Chapter 1
+# Chapter 1 Introduction
 
 ## Type classes
 
@@ -242,3 +242,11 @@ trait Invariant[F[_]] {
   def imap[A, B](fa: F[A])(f: A => B)(g: B => A): F[B] 
 }
 ```
+
+# Chapter 4 Monads
+
+Functors allow sequencing of computations ignoring some complications but are limited in that they only allow this complication to occur once at the beginning of the sequence. They don’t account for further complications at each step in the sequence.
+
+A monad’s flatMap method allows us to specify what happens next, taking into account an intermediate complication.
+
+Every monad is a functor
