@@ -245,8 +245,44 @@ trait Invariant[F[_]] {
 
 # Chapter 4 Monads
 
+For sequencing computations
+
 Functors allow sequencing of computations ignoring some complications but are limited in that they only allow this complication to occur once at the beginning of the sequence. They don’t account for further complications at each step in the sequence.
 
 A monad’s flatMap method allows us to specify what happens next, taking into account an intermediate complication.
 
 Every monad is a functor
+
+## Monads in Cats
+
+Monad extends two other type classes:
+
+  - `FlatMap` for `flatMap` method
+  - `Applicative` for `pure`
+    - `Applicative` extends `Functor`, which provides `map`
+
+`Futures` don't take implicit `ExecutionContext` in `pure` and `flatMap`.
+We must have ec in scope when calling `Monad[Future]` to get an instance
+
+## Useful monad instances
+
+### Identity Monad
+
+Enable calling monadic methods using plain values
+
+Definition
+
+```scala
+package cats
+
+type Id[A] = A
+```
+
+Usage
+
+```scala
+import cats.Id
+
+sumSquare(3 : Id[Int], 4 : Id[Int])
+```
+
