@@ -278,6 +278,11 @@ package cats
 type Id[A] = A
 ```
 
+`pure` for `Id` is just the identity function
+
+`map` and `flatMap` are the same
+
+
 Usage
 
 ```scala
@@ -285,4 +290,99 @@ import cats.Id
 
 sumSquare(3 : Id[Int], 4 : Id[Int])
 ```
+
+Definition of `sumSquare` takes in an implicit `F[_]: Monad`, but scala cannot unify value types and type constructors when searching for implicits, so we have to explicitly write `Id[Int]` in the call the `sumSquare` above
+
+### Either
+
+```scala
+import cats.syntax.either._ // for asRight
+
+val a = 3.asRight[String]
+// a: Either[String,Int] = Right(3)
+
+val b = 4.asRight[String]
+// b: Either[String,Int] = Right(4)
+
+for {
+x <- a
+y <- b
+} yield x*x + y*y
+// res4: scala.util.Either[String,Int] = Right(25)
+```
+
+The `catchOnly` and `catchNonFatal` methods are great for capturing `Exceptions` as instances of `Either`
+
+### `MonadError`
+
+`MonadError` abstracts over `Monad`s, providing extra operations for raising and handling errors
+
+`MonadError` extends `ApplicativeError`
+
+### Eval
+
+Useful for enforcing stack safety when working on large computations and data structures
+
+`Eval` has 3 subtypes: `Now`, `Later`, `Always`
+
+Scala computations can be eager, lazy, memoized
+
+  - `val`s are eager and memoized similar to `Now`
+  - `def`s are lazy and not memoized similar to `Always`
+  - `lazy val`s are lazy and memoized similar to `Later`
+
+(nothing is eager and not memoized?)
+
+Mapping functions on an `Eval` has `def` semantics
+
+Use `.memoize` to cache result up to a certain step in a chain of computations
+
+Eval's `map`, `flatMap` and `defer` methods are **trampolined**
+
+```scala
+def factorial(n: BigInt): Eval[BigInt] =
+  if(n == 1) {
+    Eval.now(n)
+  } else {
+    Eval.defer(factorial(n - 1).map(_ * n))
+  }
+```
+
+### Writer
+
+`Writer[W, A]` where `W` contains the logs, and `A` contains the result
+
+Carry logs along with computations, good for multi-threaded computations
+
+`cats.data` package
+
+`.value` to extract the value of type `A`
+
+`.written` to extract the logs of type `W`
+
+`.run` extracts both
+
+Use log type `W` that has efficient append and concatenation function
+
+```scala
+
+val writer1 = for {
+  a <- 10.pure[Logged]                   // Writer[Vector[String], Int](Vector(), 10)
+  _ <- Vector("a", "b", "c").tell        // Writer[Vector[String], Unit](Vector(a, b, c))
+  b <- 32.writer(Vector("x", "y", "z"))  // Writer[Vector[String], Int](Vector(x, y, z), 32)
+} yield a + b
+// writer1: cats.data.WriterT[cats.Id,Vector[String],Int] = WriterT((Vector(a, b, c, x, y, z),42))
+
+writer1.run
+// res4: cats.Id[(Vector[String], Int)] = (Vector(a, b, c, x, y, z),42)
+```
+
+Additional methods:
+
+  - `mapWritten` maps over the `W`
+  - `bimap` takes 2 function args, one for `A` and one for `W`
+  - `mapBoth` takes single function that has 2 arguments of types `W` and `A`, respectively
+  - `reset` clears the logs
+  - `swap` flips the `W` and the `A`
+  
 
