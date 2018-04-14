@@ -386,3 +386,14 @@ Additional methods:
   - `swap` flips the `W` and the `A`
   
 
+### Reader
+
+`type Reader[E, B] = E => B` (sort of)
+
+Sequence operations that depend on some input, useful for dependency injection, often for configuration
+
+The `map` method combines readers by chaining the output of the previous function `A => B` with the next function `B => C`
+
+The `flatMap` method makes it easy to combine two readers `Reader[E, A]` with `Reader[E, B]` in a single for-comprehension
+
+
