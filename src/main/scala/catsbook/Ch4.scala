@@ -1,5 +1,7 @@
 package catsbook
 
+import cats.data.Reader
+
 object Ch4 {
 
   object Section4_1_2 {
@@ -43,5 +45,109 @@ object Ch4 {
       }
     }
   }
+
+  object Section4_8_3 {
+    import cats.syntax.applicative._ // for pure
+
+    case class Db(
+      usernames: Map[Int, String],
+      passwords: Map[String, String]
+    )
+
+    type DbReader[A] = Reader[Db, A]
+
+    def findUsername(userId: Int): DbReader[Option[String]] = Reader { (db: Db) =>
+      db.usernames.get(userId)
+    }
+
+    def checkPassword(
+      username: String,
+      password: String
+    ): DbReader[Boolean] = Reader { db: Db =>
+      db.passwords.get(username) contains password
+    }
+
+    def checkLogin(
+      userId: Int,
+      password: String
+    ): DbReader[Boolean] = for {
+      usernameOpt <- findUsername(userId)
+      pwCorrect <- usernameOpt map { username => checkPassword(username, password) } getOrElse(false.pure[DbReader])
+    } yield pwCorrect
+
+  }
+
+  object Section4_9_3 {
+    import cats.data.State
+
+    type CalcState[A] = State[List[Int], A]
+
+    def evalOne(sym: String): CalcState[Int] = State[List[Int], Int] { oldStack:List[Int] =>
+      try {
+        val symInt = sym.toInt
+        (symInt :: oldStack, symInt)
+      } catch {
+        case _: Exception => {
+          val arg2::t = oldStack
+          val arg1::rest = t
+          sym match {
+            case "+" => {
+              val result = arg1 + arg2
+              (result :: rest, result)
+            }
+            case "*" => {
+              val result = arg1 * arg2
+              (result :: rest, result)
+            }
+          }
+        }
+      }
+    }
+
+    def evalAll(input: List[String]): CalcState[Int] =
+      input.foldLeft(State.pure[List[Int], Int](0)) {
+        (acc, sym) => acc.flatMap(_ => evalOne(sym))
+      }
+
+    def evalInput(input: String): Int =
+      evalAll(input.split("\\s+").toList).runA(Nil).value
+  }
+
+  object `4.10.1` {
+    import cats.Monad
+    import scala.annotation.tailrec
+
+    sealed trait Tree[+A]
+
+    final case class Branch[A](left: Tree[A], right: Tree[A])
+        extends Tree[A]
+
+    final case class Leaf[A](value: A) extends Tree[A]
+
+    def branch[A](left: Tree[A], right: Tree[A]): Tree[A] =
+      Branch(left, right)
+
+    def leaf[A](value: A): Tree[A] =
+      Leaf(value)
+
+
+    // val treeMonad = new Monad[Tree] {
+
+    //   def pure[A](a: A): Tree[A] = leaf(a)
+
+    //   def flatMap[A, B](t: Tree[A])(f: A => Tree[B]): Tree[B] = t match {
+    //     case Branch(l, r) => Branch(flatMap(l)(f), flatMap(r)(f))
+    //     case Leaf(a) => f(a)
+    //   }
+
+    //   // @tailrec
+    //   // def tailRecM[A, B](a: A)(f: A => Tree[Either[A, B]]): Tree[B] = f(a) match {
+    //   //   Branch(Tree[Left(l)], Tree[RightA]) => 
+    //   //}
+
+    // }
+  }
+
+
 
 }

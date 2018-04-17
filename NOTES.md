@@ -397,3 +397,19 @@ The `map` method combines readers by chaining the output of the previous functio
 The `flatMap` method makes it easy to combine two readers `Reader[E, A]` with `Reader[E, B]` in a single for-comprehension
 
 
+### State
+
+Represent a computation as the monad
+
+Pass around state object as part of atomic state computations that are combined together with combinators i.e. `map` and `flatMap` so that functions are still **pure** with no mutable state.
+
+`State[S, A]` represent `S => (S, A)` where `S` is type of state and `A` is type of the result
+
+Use `run`, `runS` and `runA` to run the monad, and the return value will be an `Eval` for stack safety, so we have to call `value` to extract the result
+
+Sequencing state monads in for comprehension results in passing the state object through the monads, even though the code doesn't actually show that
+
+
+### Custom monads
+
+`tailRecM` method is an optimization used in Cats to limit stack space
