@@ -410,6 +410,75 @@ Use `run`, `runS` and `runA` to run the monad, and the return value will be an `
 Sequencing state monads in for comprehension results in passing the state object through the monads, even though the code doesn't actually show that
 
 
-### Custom monads
+## Custom monads
 
 `tailRecM` method is an optimization used in Cats to limit stack space
+
+
+# Chapter 5 Monad Transformers
+
+Monad transformers provide way to compose monads to form a stack of 2 or more monads, which results in a new monad
+
+Composing monads in a general way is hard because `flatMap` is hard to define for arbitrary nested monads, i.e. `M1[M2[A]]]`
+
+Cats provides transformers for many monads, i.e. `EitherT` and `OptionT`
+
+```scala
+import cats.data.OptionT
+
+type ListOption[A] = OptionT[List, A]  // transform a List[Option[A]] (note the composition is inside-out)
+
+case class EitherT[F[_], E, A](stack: F[Either[E, A]]) {
+  // etc...
+}
+
+type FutureEither[A] = EitherT[Future, String, A]
+
+type FutureEitherOption[A] = OptionT[FutureEither, A] // Future[Either[String, Option[A]]]
+
+// Create an instance
+10.pure[FutureEitherOption]
+
+// Using Kind Projector
+123.pure[EitherT[Option, String, ?]]
+
+// Create using apply
+val errorStack1 = OptionT[ErrorOr, Int](Right(Some(10)))
+// errorStack1: cats.data.OptionT[ErrorOr,Int] = OptionT(Right(Some(10)))
+
+// Create using pure
+val errorStack2 = 32.pure[ErrorOrOption]
+// errorStack2: ErrorOrOption[Int] = OptionT(Right(Some(32)))
+```
+
+`Reader[T]` is type alias for `cats.data.Kleisli`
+
+Use `.value` to extract the "untransformed monad stack" via "unpacking"
+
+```scala
+// Extracting the untransformed monad stack:
+errorStack1.value
+// res11: ErrorOr[Option[Int]] = Right(Some(10))
+
+futureEitherOr
+// res14: FutureEitherOption[Int] = OptionT(EitherT(Future(Success(Right(Some(42))))))
+
+val intermediate = futureEitherOr.value
+// intermediate: FutureEither[Option[Int]] = EitherT(Future(Success(Right(Some(42)))))
+
+val stack = intermediate.value
+// stack: scala.concurrent.Future[Either[String,Option[Int]]] = Future(Success(Right(Some(42))))
+
+Await.result(stack, 1.second)
+// res15: Either[String,Option[Int]] = Right(Some(42))
+```
+
+Many monads in Cats are defined using the transformer and its `Id` monad
+
+```scala
+type Reader[E, A] = ReaderT[Id, E, A] // = Kleisli[Id, E, A]
+type Writer[W, A] = WriterT[Id, W, A]
+type State[S, A]  = StateT[Id, S, A]
+```
+
+
