@@ -5,7 +5,7 @@ import catsbook.Ch4._
 
 class Ch4Spec extends FlatSpec with Matchers {
 
-  it should "Section4 Writer Monad" in {
+  it should "Section4_7_3 Writer Monad" in {
     import Section4_7_3._
 
     import scala.concurrent._

@@ -417,7 +417,7 @@ Sequencing state monads in for comprehension results in passing the state object
 
 # Chapter 5 Monad Transformers
 
-Monad transformers provide way to compose monads to form a stack of 2 or more monads, which results in a new monad
+Monad transformers provide way to compose monads to form a stack of 2 or more monads, which results in a new monad and eliminate the need for nested for comprehensions and pattern matching
 
 Composing monads in a general way is hard because `flatMap` is hard to define for arbitrary nested monads, i.e. `M1[M2[A]]]`
 
@@ -481,4 +481,10 @@ type Writer[W, A] = WriterT[Id, W, A]
 type State[S, A]  = StateT[Id, S, A]
 ```
 
+Usage patterns
+
+- Single "super stack" that gets passed around everywhere in code
+  - works for simple and uniform code base
+- Use monad transformers as glue code locally, but expose **untransformed stacks** at module boundaries
+  - larger and heterogeneous code base
 
