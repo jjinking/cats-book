@@ -488,3 +488,115 @@ Usage patterns
 - Use monad transformers as glue code locally, but expose **untransformed stacks** at module boundaries
   - larger and heterogeneous code base
 
+# Chapter 6 Semigroupal and Applicative (Functor)
+
+Limitations to `map` and `flatMap`
+
+  - Fail fast, which means that in a series of computations, if one computation returns a fail value, the rest of the computations don't run
+  - Combinators assume that the computations are dependent on the previous result, which prevents concurrent evaluation, i.e. even for `Futures` unless they are manually started outside functor block
+  
+## `Semigroupal`
+
+`Semigroupal` provides the following:
+
+  - joins multiple contexts into a single context ("context" usually refers to a type constructor) a.k.a. "zip"
+  - sequence functions with multiple contexts
+  
+```scala
+trait Semigroupal[F[_]] {
+  def product[A, B](fa: F[A], fb: F[B]): F[(A, B)]
+}
+```
+
+For `Options`, if either `fa` or `fa` are `None`, the product is `None`
+
+For 2 <= `N` <= 22
+
+  - Methods `tupleN` combine `N` contexts
+  - Methods `mapN` apply a function to the values
+  
+```scala
+Semigroupal.map2(Option(1), Option.empty[Int])(_ + _)
+// res6: Option[Int] = None
+
+// Apply syntax
+import cats.instances.option._ // for Semigroupal
+import cats.syntax.apply._     // for tupled and mapN
+
+(Option(123), Option("abc")).tupled
+// res7: Option[(Int, String)] = Some((123,abc))
+
+case class Cat(name: String, born: Int, color: String)
+
+(
+  Option("Garfield"),
+  Option(1978),
+  Option("Orange & black")
+).mapN(Cat.apply)
+// res9: Option[Cat] = Some(Cat(Garfield,1978,Orange & black))
+```
+
+### `Futures`
+
+```scala
+import cats.Semigroupal
+import cats.instances.future._ // for Semigroupal
+import scala.concurrent._
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.higherKinds
+
+val futurePair = Semigroupal[Future].
+  product(Future("Hello"), Future(123))
+
+Await.result(futurePair, 1.second)
+// res1: (String, Int) = (Hello,123)
+```
+
+### Lists
+
+Surprisingly, instead of "zipping" the lists, the `product` function returns a cartesian product (see implementation of `product` using flatMap in file Ch6.scala)
+
+```scala
+import cats.Semigroupal
+import cats.instances.list._ // for Semigroupal
+
+Semigroupal[List].product(List(1, 2), List(3, 4))
+// res5: List[(Int, Int)] = List((1,3), (1,4), (2,3), (2,4))
+```
+
+### Either
+
+Surprisingly, the `product` function is fail-fast (because product uses `flatMap`)
+
+```scala
+import cats.instances.either._ // for Semigroupal
+
+type ErrorOr[A] = Either[Vector[String], A]
+
+Semigroupal[ErrorOr].product(
+  Left(Vector("Error 1")),
+  Left(Vector("Error 2"))
+)
+// res7: ErrorOr[(Nothing, Nothing)] = Left(Vector(Error 1))
+```
+
+### `Semigroupal` applied to `Monads`
+
+`Semigroupal` applied to `Monads` may result in the surprising and less useful behaviors, to provide high-level consistent semantics not yet covered in the book
+
+`Semigroupal`s can be useful for data types that do not have `Monad`
+
+
+
+
+
+
+## `Applicative`
+
+  - extends `Semigroupal` and `Functor`
+  - source of the `pure` method in monads
+  - provides a way of applying functions to parameters within a context
+
+
+
