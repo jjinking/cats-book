@@ -541,7 +541,7 @@ case class Cat(name: String, born: Int, color: String)
 // res9: Option[Cat] = Some(Cat(Garfield,1978,Orange & black))
 ```
 
-### `Futures`
+### Futures
 
 ```scala
 import cats.Semigroupal
@@ -588,9 +588,9 @@ Semigroupal[ErrorOr].product(
 
 ### `Semigroupal` applied to `Monads`
 
-`Semigroupal` applied to `Monads` may result in the surprising and less useful behaviors, to provide high-level consistent semantics not yet covered in the book
+`Semigroupal` applied to `Monads` may result in surprising and less useful behaviors, to provide high-level consistent semantics with `flatMap`
 
-`Semigroupal`s can be useful for data types that do not have `Monad`
+`Semigroupal`s can be useful for data types that do not have `Monad` instances
 
 
 
