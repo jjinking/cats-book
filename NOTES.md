@@ -520,8 +520,11 @@ For 2 <= `N` <= 22
 ```scala
 Semigroupal.map2(Option(1), Option.empty[Int])(_ + _)
 // res6: Option[Int] = None
+```
 
-// Apply syntax
+#### Apply syntax
+
+```scala
 import cats.instances.option._ // for Semigroupal
 import cats.syntax.apply._     // for tupled and mapN
 
