@@ -508,7 +508,9 @@ trait Semigroupal[F[_]] {
 }
 ```
 
-For `Options`, if either `fa` or `fa` are `None`, the product is `None`
+### Options
+
+If either `fa` or `fb` are `None`, the product is `None`
 
 For 2 <= `N` <= 22
 
