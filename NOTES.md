@@ -592,6 +592,77 @@ Semigroupal[ErrorOr].product(
 
 `Semigroupal`s can be useful for data types that do not have `Monad` instances
 
+### Validated
+
+Instance of `Semigroupal` but no instance of `Monad`, so `product` method is free to accumulate errors
+
+```scala
+import cats.Semigroupal
+import cats.data.Validated
+import cats.instances.list._ // for Monoid
+
+type AllErrorsOr[A] = Validated[List[String], A]
+
+Semigroupal[AllErrorsOr].product(
+  Validated.invalid(List("Error 1")),
+  Validated.invalid(List("Error 2"))
+)
+// res1: AllErrorsOr[(Nothing, Nothing)] = Invalid(List(Error 1, Error 2))
+```
+
+Using "smart constructors"
+
+```scala
+val v = Validated.valid[List[String], Int](123)
+// v: cats.data.Validated[List[String],Int] = Valid(123)
+
+val i = Validated.invalid[List[String], Int](List("Badness"))
+// i: cats.data.Validated[List[String],Int] = Invalid(List(Badness))
+```
+
+Using syntax extension
+
+```scala
+import cats.syntax.validated._ // for valid and invalid
+
+123.valid[List[String]]
+// res2: cats.data.Validated[List[String],Int] = Valid(123)
+
+List("Badness").invalid[Int]
+// res3: cats.data.Validated[List[String],Int] = Invalid(List(Badness))
+```
+
+Other methods to create instances of `Validated`
+
+```scala
+// Using applicatives
+import cats.syntax.applicative._      // for pure
+import cats.syntax.applicativeError._ // for raiseError
+
+type ErrorsOr[A] = Validated[List[String], A]
+
+123.pure[ErrorsOr]
+// res5: ErrorsOr[Int] = Valid(123)
+
+List("Badness").raiseError[ErrorsOr, Int]
+// res6: ErrorsOr[Int] = Invalid(List(Badness))
+
+// From other data types
+Validated.catchOnly[NumberFormatException]("foo".toInt)
+// res7: cats.data.Validated[NumberFormatException,Int] = Invalid(java.lang.NumberFormatException: For input string: "foo")
+
+Validated.catchNonFatal(sys.error("Badness"))
+// res8: cats.data.Validated[Throwable,Nothing] = Invalid(java.lang.RuntimeException: Badness)
+
+Validated.fromTry(scala.util.Try("foo".toInt))
+// res9: cats.data.Validated[Throwable,Int] = Invalid(java.lang.NumberFormatException: For input string: "foo")
+
+Validated.fromEither[String, Int](Left("Badness"))
+// res10: cats.data.Validated[String,Int] = Invalid(Badness)
+
+Validated.fromOption[String, Int](None, "Badness")
+// res11: cats.data.Validated[String,Int] = Invalid(Badness)
+```
 
 
 
