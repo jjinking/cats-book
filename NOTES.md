@@ -664,15 +664,54 @@ Validated.fromOption[String, Int](None, "Badness")
 // res11: cats.data.Validated[String,Int] = Invalid(Badness)
 ```
 
+Combine instances of `Validated`
 
+```scala
+type AllErrorsOr[A] = Validated[String, A] // Fix error type
 
+import cats.instances.string._ // for Semigroup
 
+Semigroupal[AllErrorsOr]
+// res13: cats.Semigroupal[AllErrorsOr] = cats.data.ValidatedInstances$$anon$1@7be29203
 
-## `Applicative`
+// Accumulate errors
+import cats.syntax.apply._ // for tupled
 
-  - extends `Semigroupal` and `Functor`
+(
+  "Error 1".invalid[Int],
+  "Error 2".invalid[Int]
+).tupled
+// res14: cats.data.Validated[String,(Int, Int)] = Invalid(Error 1Error 2)
+
+import cats.instances.vector._ // for Semigroupal
+
+(
+  Vector(404).invalid[Int],
+  Vector(500).invalid[Int]
+).tupled
+// res15: cats.data.Validated[scala.collection.immutable.Vector[Int],(Int, Int)] = Invalid(Vector(404, 500))
+
+```
+
+`Validated` also has methods similar to `Either`: `map`, `leftMap`, `bimap`
+
+no `flatMap` since it's not a `Monad`
+
+Convert to `Either` using `toEither` and convert back using `toValidated`
+
+```scala
+41.valid[String].withEither(_.flatMap(n => Right(n + 1)))
+// res24: cats.data.Validated[String,Int] = Valid(42)
+```
+
+## `Apply` and `Applicative`
+
+Cats has two type classes for applicatives
+
+`Apply` extends `Semigroupal` and `Functor` and add `ap` method
+
+`Applicative` extends `Apply`, and adds `pure`
   - source of the `pure` method in monads
-  - provides a way of applying functions to parameters within a context
 
-
+provides a way of applying functions to parameters within a context
 
