@@ -706,6 +706,8 @@ Convert to `Either` using `toEither` and convert back using `toValidated`
 
 ## `Apply` and `Applicative`
 
+`Semigroupal` and `Applicative` basically provide a way of joining "contexts" (`F[_]`), i.e. provides a way of applying functions to parameters within a context
+
 Cats has two type classes for applicatives
 
 `Apply` extends `Semigroupal` and `Functor` and add `ap` method
@@ -713,5 +715,4 @@ Cats has two type classes for applicatives
 `Applicative` extends `Apply`, and adds `pure`
   - source of the `pure` method in monads
 
-provides a way of applying functions to parameters within a context
-
+Analogy: `Applicative:Apply::Monoid::Semigroup`
