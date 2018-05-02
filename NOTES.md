@@ -716,3 +716,7 @@ Cats has two type classes for applicatives
   - source of the `pure` method in monads
 
 Analogy: `Applicative:Apply::Monoid::Semigroup`
+
+Hierarchy of Sequencing type classes [diagram](https://raw.githubusercontent.com/underscoreio/advanced-scala/develop/src/pages/applicatives/hierarchy.png)
+
+
