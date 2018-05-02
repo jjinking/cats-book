@@ -706,7 +706,9 @@ Convert to `Either` using `toEither` and convert back using `toValidated`
 
 ## `Apply` and `Applicative`
 
-`Semigroupal` and `Applicative` basically provide a way of joining "contexts" (`F[_]`), i.e. provides a way of applying functions to parameters within a context
+`Semigroupal` and `Applicative` basically provide a way of joining "contexts" (`F[_]`).
+
+`Applicative` functors provides a way of **applying** functions to parameters within a context
 
 Cats has two type classes for applicatives
 
@@ -719,4 +721,12 @@ Analogy: `Applicative:Apply::Monoid::Semigroup`
 
 Hierarchy of Sequencing type classes [diagram](https://raw.githubusercontent.com/underscoreio/advanced-scala/develop/src/pages/applicatives/hierarchy.png)
 
+(Mathematical) power vs constraint: More constraints on a data type means more guarantees about specific behavior, but the behavior is less general
 
+`Mondad`s are usually flexible enough to provide a wide range of behaviors while still restrictive enough to provide strong guarantees, but it's not always the right choice because it imposes strict sequencing on the computations. For these situations, `Applicatives` and `Semigroupals` come in handy, but lose ability to `flatMap`
+
+## Summary
+
+Monads and functors are the most widely used sequencing data types while semigroupals and applicatives are the most general.
+
+Most common uses of semigroupals and applicatives are to combine independent values, i.e. result of validating a form. Cats provides `Validated` data type for this purpse
