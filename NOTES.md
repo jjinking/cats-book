@@ -764,7 +764,7 @@ def sum2[A](l: List[A])(implicit ev: Monoid[A]): A =
 
 ### Typeclasses
 
-Example with List
+Example with `List`
 
 ```scala
 import cats.Foldable
@@ -776,7 +776,7 @@ Foldable[List].foldLeft(ints, 0)(_ + _)
 // res1: Int = 6
 ```
 
-Example with Option
+Example with `Option`
 
 ```scala
 import cats.instances.option._ // for Foldable
@@ -802,3 +802,4 @@ eval.value
 // res7: Long = 5000050000
 ```
 
+7.1.4.2 Folding with Monoids
