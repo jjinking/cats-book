@@ -730,3 +730,33 @@ Hierarchy of Sequencing type classes [diagram](https://raw.githubusercontent.com
 Monads and functors are the most widely used sequencing data types while semigroupals and applicatives are the most general.
 
 Most common uses of semigroupals and applicatives are to combine independent values, i.e. result of validating a form. Cats provides `Validated` data type for this purpse
+
+# Chapter 7 Foldable and Traverse
+
+## Foldable
+
+`foldLeft` and `foldRight`
+
+Used with `Monoid` and `Eval`
+
+```scala
+# map in terms of foldRight
+
+def map[A, B](l: List[A], f: A => B): List[B] =
+  l.foldRight(List.empty[B])((a, accum) => f(a) :: accum)
+  
+def flatMap[A, B](l: List[A], f: A => List[B]): List[B] =
+  l.foldRight(List.empty[B])((a, accum) => f(a) ::: accum) // Use ++ for general `Traversable`, but ::: makes it right-associative for List
+  
+def filter[A](l: List[A], p: A => Boolean): List[A] =
+  l.foldRight(List.empty[A])((a, accum) => if (p(a)) a :: accum else accum)
+
+def sum[A, B](l: List[A])(z: B)(f: (A, A) => B): B =
+  l.foldRight(z)(f)
+
+import cats.Monoid
+
+def sum2[A](l: List[A])(implicit ev: Monoid[A]): A =
+  l.foldRight(ev.empty)(ev.combine)
+```
+
