@@ -735,9 +735,11 @@ Most common uses of semigroupals and applicatives are to combine independent val
 
 ## Foldable
 
-`foldLeft` and `foldRight`
+Typeclass implements `foldLeft` and `foldRight`
 
 Used with `Monoid` and `Eval`
+
+### Exercise 7.1.3
 
 ```scala
 # map in terms of foldRight
@@ -758,5 +760,45 @@ import cats.Monoid
 
 def sum2[A](l: List[A])(implicit ev: Monoid[A]): A =
   l.foldRight(ev.empty)(ev.combine)
+```
+
+### Typeclasses
+
+Example with List
+
+```scala
+import cats.Foldable
+import cats.instances.list._ // for Foldable
+
+val ints = List(1, 2, 3)
+
+Foldable[List].foldLeft(ints, 0)(_ + _)
+// res1: Int = 6
+```
+
+Example with Option
+
+```scala
+import cats.instances.option._ // for Foldable
+
+val maybeInt = Option(123)
+
+Foldable[Option].foldLeft(maybeInt, 10)(_ * _)
+// res3: Int = 1230
+```
+
+Default `foldRight` method on sequences is not stack safe for streams, but `Foldable` uses `Eval` monad to make it stack safe
+
+```
+import cats.instances.stream._ // for Foldable
+
+val eval: Eval[Long] =
+  Foldable[Stream].
+    foldRight(bigData, Eval.now(0L)) { (num, eval) =>
+      eval.map(_ + num)
+    }
+
+eval.value
+// res7: Long = 5000050000
 ```
 
