@@ -855,7 +855,7 @@ To guarantee stack safety when using `foldRight`, use `Eval` as accumulator type
 
 Higher level tool, leverages `Applicatives` to provide a more convenient, lawful pattern for iteration
 
-## `traverse` method on `Future`
+### `traverse` method on `Future`
 
 `Future.traverse[A, B]: (List[A]) => (A => Future[B]) => Future[List[B]]`
 
@@ -895,7 +895,7 @@ Await.result(allUptimesTraverse, 1.second)
 // res3: List[Int] = List(1020, 960, 840)
 ```
 
-## `sequence` method on `Future`
+### `sequence` method on `Future`
 
 `Future.sequence[B]: (List[Future[B]]) => Future[List[B]]`
 
