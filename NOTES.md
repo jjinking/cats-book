@@ -943,7 +943,7 @@ process(List(1, 2, 3))
 // res27: ErrorsOr[List[Int]] = Invalid(List(1 is not even, 3 is not even))
 ```
 
-#### Generalizing `traverse` with `Applicative` for any sequence using Cats' `Traverse`
+#### Generalizing `traverse` for any sequence type using Cats' `Traverse`
 
 ```scala
 package cats
