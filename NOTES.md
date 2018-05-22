@@ -845,4 +845,6 @@ List(1, 2, 3).foldMap(_.toString)
 // res17: String = 123
 ```
 
-When calling `foldLeft`, `Foldable` method is used if the sequence object doesn't already have `foldLeft` implemented. To guarantee stack safety, call `foldLeft` with `Eval` as accumulator type.
+When calling `foldLeft`, `Foldable` method is used if the sequence object doesn't already have `foldLeft` implemented. No need to worry about which one is being used.
+
+To guarantee stack safety when using `foldRight`, use `Eval` as accumulator type.
