@@ -899,3 +899,98 @@ Await.result(allUptimesTraverse, 1.second)
 
 `Future.sequence[B]: (List[Future[B]]) => Future[List[B]]`
 
+### Generalizing `traverse` with `Applicative`
+
+#### Applicatives and Lists
+
+The zero value is the `pure` value of `F[_]: Applicative` with the empty `List`, and the combine function is `mapN`
+
+```scala
+import scala.language.higherKinds
+
+def listTraverse[F[_]: Applicative, A, B]
+      (list: List[A])(func: A => F[B]): F[List[B]] =
+  list.foldLeft(List.empty[B].pure[F]) { (accum, item) =>
+    (accum, func(item)).mapN(_ :+ _)
+  }
+
+def listSequence[F[_]: Applicative, B]
+      (list: List[F[B]]): F[List[B]] =
+  listTraverse(list)(identity)
+```
+
+Example: traversing with `Validated`
+
+```scala
+import cats.data.Validated
+import cats.instances.list._ // for Monoid
+
+type ErrorsOr[A] = Validated[List[String], A]
+
+def process(inputs: List[Int]): ErrorsOr[List[Int]] =
+  listTraverse(inputs) { n =>
+    if(n % 2 == 0) {
+      Validated.valid(n)
+    } else {
+      Validated.invalid(List(s"$n is not even"))
+    }
+  }
+  
+process(List(2, 4, 6))
+// res26: ErrorsOr[List[Int]] = Valid(List(2, 4, 6))
+
+process(List(1, 2, 3))
+// res27: ErrorsOr[List[Int]] = Invalid(List(1 is not even, 3 is not even))
+```
+
+#### Generalizing `traverse` with `Applicative` for any sequence using Cats' `Traverse`
+
+```scala
+package cats
+
+// F[_] is the sequence type, like List
+// G[_] is the Applicative, like Future
+trait Traverse[F[_]] {
+  def traverse[G[_]: Applicative, A, B]
+      (inputs: F[A])(func: A => G[B]): G[F[B]]
+
+  def sequence[G[_]: Applicative, B]
+      (inputs: F[G[B]]): G[F[B]] =
+    traverse(inputs)(identity)
+}
+```
+
+Cats provides instances of `Traverse` for sequence types: `List`, `Vector`, `Stream`, `Option`, `Either`, etc.
+Use `Traverse.apply` to create instances, and use `traverse` and `sequence` methods
+
+```scala
+import cats.Traverse
+import cats.instances.future._ // for Applicative
+import cats.instances.list._   // for Traverse
+
+val totalUptime: Future[List[Int]] =
+  Traverse[List].traverse(hostnames)(getUptime)
+
+Await.result(totalUptime, 1.second)
+// res1: List[Int] = List(1020, 960, 840)
+
+val numbers = List(Future(1), Future(2), Future(3))
+
+val numbers2: Future[List[Int]] =
+  Traverse[List].sequence(numbers)
+
+Await.result(numbers2, 1.second)
+// res3: List[Int] = List(1, 2, 3)
+
+// -----------------------------------------------
+// With extended syntax:
+
+import cats.syntax.traverse._ // for sequence and traverse
+
+Await.result(hostnames.traverse(getUptime), 1.second)
+// res4: List[Int] = List(1020, 960, 840)
+
+Await.result(numbers.sequence, 1.second)
+// res5: List[Int] = List(1, 2, 3)
+```
+
