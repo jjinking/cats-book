@@ -787,9 +787,9 @@ Foldable[Option].foldLeft(maybeInt, 10)(_ * _)
 // res3: Int = 1230
 ```
 
-Default `foldRight` method on sequences is not stack safe for streams, but `Foldable` uses `Eval` monad to make it stack safe
+Default `foldRight` method on sequences is not stack safe for streams, but `Foldable` uses `Eval` monad to make it stack safe. `List` and `Vector` provide stack safe implementations of `foldRight`
 
-```
+```scala
 import cats.instances.stream._ // for Foldable
 
 val eval: Eval[Long] =
@@ -802,4 +802,47 @@ eval.value
 // res7: Long = 5000050000
 ```
 
-7.1.4.2 Folding with Monoids
+### Folding with Monoids
+
+`combineAll` (aka `fold`) combine all elements in the sequence using their `Monoid`
+
+```scala
+import cats.instances.int._ // for Monoid
+
+Foldable[List].combineAll(List(1, 2, 3))
+// res12: Int = 6
+```
+
+`foldMap` maps a function to sequence elements, then combines them using a `Monoid`
+
+```scala
+import cats.instances.string._ // for Monoid
+
+Foldable[List].foldMap(List(1, 2, 3))(_.toString)
+// res13: String = 123
+```
+
+Compose `Foldables` for nested sequences
+
+```scala
+import cats.instances.vector._ // for Monoid
+
+val ints = List(Vector(1, 2, 3), Vector(4, 5, 6))
+
+(Foldable[List] compose Foldable[Vector]).combineAll(ints)
+// res15: Int = 21
+```
+
+Syntax extension
+
+```scala
+import cats.syntax.foldable._ // for combineAll and foldMap
+
+List(1, 2, 3).combineAll
+// res16: Int = 6
+
+List(1, 2, 3).foldMap(_.toString)
+// res17: String = 123
+```
+
+When calling `foldLeft`, `Foldable` method is used if the sequence object doesn't already have `foldLeft` implemented. To guarantee stack safety, call `foldLeft` with `Eval` as accumulator type.
