@@ -995,3 +995,6 @@ Await.result(numbers.sequence, 1.second)
 // res5: List[Int] = List(1, 2, 3)
 ```
 
+# Chapter 8 Case Study: Testing Asynchronous Code
+
+
