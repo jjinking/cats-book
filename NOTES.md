@@ -990,6 +990,7 @@ import cats.syntax.traverse._ // for sequence and traverse
 Await.result(hostnames.traverse(getUptime), 1.second)
 // res4: List[Int] = List(1020, 960, 840)
 
+val numbers = List(Future(1), Future(2), Future(3))
 Await.result(numbers.sequence, 1.second)
 // res5: List[Int] = List(1, 2, 3)
 ```
