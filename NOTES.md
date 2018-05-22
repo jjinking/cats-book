@@ -787,6 +787,8 @@ Foldable[Option].foldLeft(maybeInt, 10)(_ * _)
 // res3: Int = 1230
 ```
 
+### Stack safe `foldRight`
+
 Default `foldRight` method on sequences is not stack safe for streams, but `Foldable` uses `Eval` monad to make it stack safe. `List` and `Vector` provide stack safe implementations of `foldRight`
 
 ```scala
@@ -848,3 +850,52 @@ List(1, 2, 3).foldMap(_.toString)
 When calling `foldLeft`, `Foldable` method is used if the sequence object doesn't already have `foldLeft` implemented. No need to worry about which one is being used.
 
 To guarantee stack safety when using `foldRight`, use `Eval` as accumulator type.
+
+## Traverse
+
+Higher level tool, leverages `Applicatives` to provide a more convenient, lawful pattern for iteration
+
+## `traverse` method on `Future`
+
+`Future.traverse[A, B]: (List[A]) => (A => Future[B]) => Future[List[B]]`
+
+Example usage:
+
+```scala
+import scala.concurrent._
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+
+val hostnames = List(
+  "alpha.example.com",
+  "beta.example.com",
+  "gamma.demo.com"
+)
+
+def getUptime(hostname: String): Future[Int] =
+  Future(hostname.length * 60) // just for demonstration
+  
+val allUptimes: Future[List[Int]] =
+  hostnames.foldLeft(Future(List.empty[Int])) {
+    (accum, host) =>
+      val uptime = getUptime(host)
+      for {
+        accum  <- accum
+        uptime <- uptime
+      } yield accum :+ uptime
+  }
+
+Await.result(allUptimes, 1.second)
+// res2: List[Int] = List(1020, 960, 840)
+
+val allUptimesTraverse: Future[List[Int]] =
+  Future.traverse(hostnames)(getUptime)
+
+Await.result(allUptimesTraverse, 1.second)
+// res3: List[Int] = List(1020, 960, 840)
+```
+
+## `sequence` method on `Future`
+
+`Future.sequence[B]: (List[Future[B]]) => Future[List[B]]`
+
