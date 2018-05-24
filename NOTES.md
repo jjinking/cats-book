@@ -997,4 +997,55 @@ Await.result(numbers.sequence, 1.second)
 
 # Chapter 8 Case Study: Testing Asynchronous Code
 
+## 8.1 Abstracting over Type Constructors
+```scala
+import scala.language.higherKinds
+import cats.Id
 
+trait UptimeClient[F[_]] {
+  def getUptime(hostname: String): F[Int]
+}
+
+trait RealUptimeClient extends UptimeClient[Future] {
+  def getUptime(hostname: String): Future[Int]
+}
+
+trait TestUptimeClient extends UptimeClient[Id] {
+  def getUptime(hostname: String): Id[Int]
+}
+
+// Fleshed out class
+class TestUptimeClient((hosts: Map[String, Int])) extends UptimeClient[Id] {
+  def getUptime(hostname: String): Int = hosts.getOrElse(hostName, 0)
+}
+```
+
+## 8.2 Abstracting over Monads
+
+```scala
+import cats.Applicative
+import cats.syntax.functor._ // for map
+import scala.language.higherKinds
+
+class UptimeService[F[_]: Applicative](client: UptimeClient[F]) {
+  def getTotalUptime(hostnames: List[String]): F[Int] =
+    hostnames.traverse(client.getUptime).map(_.sum)
+}
+
+def testTotalUptime() = {
+  val hosts    = Map("host1" -> 10, "host2" -> 6)
+  val client   = new TestUptimeClient(hosts)
+  val service  = new UptimeService(client)
+  val actual   = service.getTotalUptime(hosts.keys.toList)
+  val expected = hosts.values.sum
+  assert(actual == expected)
+}
+
+testTotalUptime()
+```
+
+## 8.3 Summary
+
+"The mathematical laws ... ensure that they (type classes like `Monad` and `Applicative`) work together with a consistent set of semantics."
+
+"We used Applicative in this case study because it was the least powerful type class that did what we needed. If we had required flatMap, we could have swapped out Applicative for Monad. If we had needed to abstract over different sequence types, we could have used Traverse."
