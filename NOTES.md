@@ -1064,6 +1064,6 @@ testTotalUptime()
 ```scala
 import cats.Monoid
 
-def foldMap[A, B: Monoid](Seq[A], f: A => B): B
+def foldMap[A, B: Monoid](vA: Vector[A], f: A => B): B
 ```
 
