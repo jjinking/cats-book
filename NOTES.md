@@ -1079,14 +1079,28 @@ import cats.instances.list._   // for Traverse
 import cats.instances.future._ // for Monad and Monoid
 import cats.syntax.traverse._  // for sequence
 import cats.syntax.semigroup._ // for |+|
-import scala.concurrent.Future
+import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
+def listToFut[A](l: List[A], f: A => B)(implicit ec: ExecutionContext): Future[B] = {
+  // val futL: Future[List[A]] = Monad[Future].pure(l)
+  // val futB: Future[B] = futL.map(lA => foldMap(lA)(f))
+  // futB
+  Monad[Future].pure(l).map(lA => foldMap(lA)(f))
+}
+
 def parallelFoldMap[A, B: Monoid](values: Vector[A])(func: A => B): Future[B] = {
-  val grouped: List[List[A]] = values.grouped(Runtime.getRuntime.availableProcessors).toList
-  val foo: List[Future[B]] = grouped.map(f: List[A] => Future[B])
-  val bar: Future[List[B]] = foo.sequence
-  val hello: Future[B] = bar.map(_.foldLeft(Monoid[B].empty)(_ |+| _))
-  hello
+  val numCores  = Runtime.getRuntime.availableProcessors
+  val groupSize = (1.0 * values.size / numCores).ceil.toInt
+  // val grouped: List[List[A]] = values.grouped(groupSize).toList
+  // val groupedF: List[Future[B]] = grouped.map(l => listToFut(l, func))
+  // val futGroup: Future[List[B]] = groupedF.sequence
+  // val futB: Future[B] = futGroup.map(lB => foldMap(lB)(id))
+  // futB
+  val grouped: List[List[A]] = values.grouped(groupSize).toList
+  for {
+    lB <- grouped.map(l => listToFut(l, func)).sequence  
+  } yield foldMap(lB)(id)  
 }
 ```
+
