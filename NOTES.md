@@ -1063,7 +1063,30 @@ testTotalUptime()
 
 ```scala
 import cats.Monoid
+import cats.syntax.semigroup._ // for |+|
 
-def foldMap[A, B: Monoid](vA: Vector[A], f: A => B): B
+def foldMap[A, B: Monoid](vA: Vector[A])(f: A => B): B =
+  vA.map(f).foldLeft(Monoid[B].empty)(_ |+| _)
 ```
 
+## 9.3 parallelFoldMap
+
+**Importing an `ExecutionContext.Implicits.global`**: Allocates a thread pool with one thread per CPU in the running machine
+
+```scala
+import cats.{Monad, Monoid}
+import cats.instances.list._   // for Traverse
+import cats.instances.future._ // for Monad and Monoid
+import cats.syntax.traverse._  // for sequence
+import cats.syntax.semigroup._ // for |+|
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
+def parallelFoldMap[A, B: Monoid](values: Vector[A])(func: A => B): Future[B] = {
+  val grouped: List[List[A]] = values.grouped(Runtime.getRuntime.availableProcessors).toList
+  val foo: List[Future[B]] = grouped.map(f: List[A] => Future[B])
+  val bar: Future[List[B]] = foo.sequence
+  val hello: Future[B] = bar.map(_.foldLeft(Monoid[B].empty)(_ |+| _))
+  hello
+}
+```
