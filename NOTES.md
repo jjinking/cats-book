@@ -1049,3 +1049,21 @@ testTotalUptime()
 "The mathematical laws ... ensure that they (type classes like `Monad` and `Applicative`) work together with a consistent set of semantics."
 
 "We used Applicative in this case study because it was the least powerful type class that did what we needed. If we had required flatMap, we could have swapped out Applicative for Monad. If we had needed to abstract over different sequence types, we could have used Traverse."
+
+
+# 9 Case Study: Map-Reduce
+
+`Monoid` for map-reduce:
+
+- Reduce is called `fold` in scala, and must be **associative**
+
+- Each reduce must be seeded with a neutral element
+
+## 9.2 foldMap
+
+```scala
+import cats.Monoid
+
+def foldMap[A, B: Monoid](Seq[A], f: A => B): B
+```
+
