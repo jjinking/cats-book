@@ -1053,7 +1053,7 @@ testTotalUptime()
 
 # 9 Case Study: Map-Reduce
 
-`Monoid` for map-reduce:
+`Functor` for map, `Monoid` for map-reduce:
 
 - Reduce is called `fold` in scala, and must be **associative**
 
