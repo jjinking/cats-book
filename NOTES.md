@@ -1111,12 +1111,13 @@ import cats.Semigroup
 import cats.data.Validated
 import cats.syntax.semigroup._ // for |+|
 import cats.syntax.apply._     // for mapN
+import cats.data.Validated._   // for Valid and Invalid
 
-sealed trait Check[E, A] {
-  def and(that: Check[E, A]): Check[E, A] =
+sealed trait Predicate[E, A] {
+  def and(that: Predicate[E, A]): Predicate[E, A] =
     And(this, that)
-    
-  def or(that: Check[E, A]): Check[E, A] =
+
+  def or(that: Predicate[E, A]): Predicate[E, A] =
     Or(this, that)
 
   def apply(a: A)(implicit s: Semigroup[E]): Validated[E, A] =
@@ -1129,10 +1130,10 @@ sealed trait Check[E, A] {
 
       case Or(left, right) =>
         left(a) match {
-          case Valid(a)    => Valid(a)
+          case Valid(a1)   => Valid(a)
           case Invalid(e1) =>
             right(a) match {
-              case Valid(a)    => Valid(a)
+              case Valid(a2)   => Valid(a)
               case Invalid(e2) => Invalid(e1 |+| e2)
             }
         }
@@ -1140,15 +1141,23 @@ sealed trait Check[E, A] {
 }
 
 final case class And[E, A](
-  left: Check[E, A],
-  right: Check[E, A]) extends Check[E, A]
+  left: Predicate[E, A],
+  right: Predicate[E, A]) extends Predicate[E, A]
 
 final case class Or[E, A](
-  left: Check[E, A],,
-  right: Check[E, A]) extends Check[E, A]
+  left: Predicate[E, A],
+  right: Predicate[E, A]) extends Predicate[E, A]
 
 final case class Pure[E, A](
-  func: A => Validated[E, A]) extends Check[E, A]
-```
+  func: A => Validated[E, A]) extends Predicate[E, A]
 
-## 10.4 Transforming Data
+
+sealed trait Check[E, A, B] {
+  def apply(a: A): Validated[E, B] =
+    ???
+
+  def map[C](func: B => C): Check[E, A, C] =
+    ???
+}
+
+```
