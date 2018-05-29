@@ -1150,3 +1150,5 @@ final case class Or[E, A](
 final case class Pure[E, A](
   func: A => Validated[E, A]) extends Check[E, A]
 ```
+
+## 10.4 Transforming Data
