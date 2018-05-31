@@ -1191,3 +1191,18 @@ final case class AndThen[E, A, B, C](
     check1(a).withEither(_.flatMap(b => check2(b).toEither))
 }
 ```
+
+
+# 11 Case Study: CRDTs
+
+Commutative Replicated Data Types
+
+Strong consistency
+- High latency - many messages sent between machines in cluster
+- Low availability - network partition may cause machines to refuse updates to prevent inconsistencies
+
+Eventual consistency
+- Low latency - less communication between machines
+- High availability - machines will still accept updates even during network partition, and reconcile changes when network is back up
+
+
