@@ -1243,6 +1243,9 @@ Eventual consistency
 - High availability - machines will still accept updates even during network partition, and reconcile changes when network is back up
 
 **GCounter**
+
+Eventually consistent increment-only counter
+
 ```scala
 final case class GCounter(counters: Map[String, Int]) {
   def increment(machine: String, amount: Int): GCounter = GCounter {
@@ -1259,3 +1262,14 @@ final case class GCounter(counters: Map[String, Int]) {
 }
 ```
 
+Properties of each function
+
+  - `increment`: identity and associativity
+  - `total`: commutativity and associativity, and implicitly identity (nonexistent keys have 0 values)
+  - `merge`: commutativity and associativity, identity, and **idempotency** (when two machines have same data, always return correct same result when run multiple times)
+
+Notes on **idempotency**:
+
+- idempotent unary functions return same result on repeat runs, i.e. `f(x) = f(f(x)) = f(f(f(x))) = ...` ex: absolute value (`abs`)
+- Given (f, e), where f is a binary function f and e are input elements to f, if `f(e, e) = e`
+  - examples: `max(x, x) = x`, `1 x 1 = 1`
