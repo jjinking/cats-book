@@ -1309,6 +1309,7 @@ final case class GCounter[A](counters: Map[String, A]) {
     counters + (machine -> amount |+| counters.getOrElse(machine, m.empty))
   }
 
+  // How can you combine the counters of type Map when you only have implicit BoundedSemiLattice instances for Int and Set?
   def merge(that: GCounter[A])(implicit b: BoundedSemiLattice[A]): GCounter[A] =
     GCounter(counters |+| that.counters)
     //GCounter { counters ++ that.counters.map {
