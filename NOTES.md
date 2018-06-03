@@ -396,6 +396,43 @@ The `map` method combines readers by chaining the output of the previous functio
 
 The `flatMap` method makes it easy to combine two readers `Reader[E, A]` with `Reader[E, B]` in a single for-comprehension
 
+```scala
+import cats.data.Reader
+
+case class Cat(name: String, favoriteFood: String)
+// defined class Cat
+
+// Simple Reader -------------------------
+val catName: Reader[Cat, String] =
+  Reader(cat => cat.name)
+// catName: cats.data.Reader[Cat,String] = Kleisli(<function1>)
+
+catName.run(Cat("Garfield", "lasagne"))
+// res0: cats.Id[String] = Garfield
+
+// map example -------------------------
+val greetKitty: Reader[Cat, String] =
+  catName.map(name => s"Hello ${name}")
+
+greetKitty.run(Cat("Heathcliff", "junk food"))
+// res1: cats.Id[String] = Hello Heathcliff
+
+// flatMap example -------------------------
+val feedKitty: Reader[Cat, String] =
+  Reader(cat => s"Have a nice bowl of ${cat.favoriteFood}")
+
+val greetAndFeed: Reader[Cat, String] =
+  for {
+    greet <- greetKitty
+    feed  <- feedKitty
+  } yield s"$greet. $feed."
+
+greetAndFeed(Cat("Garfield", "lasagne"))
+// res3: cats.Id[String] = Hello Garfield. Have a nice bowl of lasagne.
+
+greetAndFeed(Cat("Heathcliff", "junk food"))
+// res4: cats.Id[String] = Hello Heathcliff. Have a nice bowl of junk food.
+```
 
 ### State
 
