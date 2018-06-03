@@ -1270,6 +1270,7 @@ Properties of each function
 
 Notes on **idempotency**:
 
-- idempotent unary functions return same result on repeat runs, i.e. `f(x) = f(f(x)) = f(f(f(x))) = ...` ex: absolute value (`abs`)
-- Given (f, e), where f is a binary function f and e are input elements to f, if `f(e, e) = e`
-  - examples: `max(x, x) = x`, `1 x 1 = 1`
+- **idempotent unary functions** return same result on repeat runs, i.e. `f(x) = f(f(x)) = f(f(f(x))) = ...` ex: absolute value (`abs`)
+- **idempotent element** `e` for a binary function `f` are elements that satisfy `f(e, e) = e`
+  - ex: 1 is idempotent for multiplication
+- **idempotent binary functions** satisfy `f(e, e) = e` for all inputs `e`
