@@ -313,7 +313,7 @@ y <- b
 
 The `catchOnly` and `catchNonFatal` methods are great for capturing `Exceptions` as instances of `Either`
 
-### `MonadError`
+### MonadError
 
 `MonadError` abstracts over `Monad`s, providing extra operations for raising and handling errors
 
