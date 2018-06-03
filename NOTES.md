@@ -1257,16 +1257,18 @@ final case class GCounter(counters: Map[String, Int]) {
       case (k, v) => k -> v max counters.getOrElse(k, 0)
     }}
 
-  def total: Int =
-    counters.values.sum
+  def total: Int = counters.values.sum
 }
 ```
 
 Properties of each function
 
   - `increment`: identity and associativity
+    - requires `Monoid`
   - `total`: commutativity and associativity, and implicitly identity (nonexistent keys have 0 values)
+    - requires commutative `Monoid`
   - `merge`: commutativity and associativity, identity, and **idempotency** (when two machines have same data, always return correct same result when run multiple times)
+    - requires idempotent commutative `Monoid` (**bounded semilattice**)
 
 Notes on **idempotency**:
 
@@ -1274,3 +1276,45 @@ Notes on **idempotency**:
 - **idempotent element** `e` for a binary function `f` are elements that satisfy `f(e, e) = e`
   - ex: 1 is idempotent for multiplication
 - **idempotent binary functions** satisfy `f(e, e) = e` for all inputs `e`
+
+`BoundedSemiLattice`
+
+```scala
+
+import cats.Monoid
+
+trait BoundedSemiLattice[A] extends Monoid[A] {
+  def combine(a1: A, a2: A): A
+  def empty: A
+}
+
+object BoundedSemiLattice {
+  implicit val intInst: BoundedSemiLattice[Int] = new BoundedSemiLattice[Int] {
+    override def combine(a1: Int, a2: Int): Int = a1 max a2
+    override val empty: Int = 0
+  }
+  implicit def setInst[A]: BoundedSemiLattice[Set[A]] = new BoundedSemiLattice[Set[A]] {
+    override def combine(a1: Set[A], a2: Set[A]): Set[A] = a1 union a2
+    override val empty: Set[A] = Set.empty[A]
+  }  
+}
+
+import cats.instances.list._   // for Monoid
+import cats.instances.map._    // for Monoid
+import cats.syntax.semigroup._ // for |+|
+import cats.syntax.foldable._  // for combineAll
+
+final case class GCounter[A](counters: Map[String, A]) {
+  def increment(machine: String, amount: A)(implicit m: Monoid[A]): GCounter[A] = GCounter {
+    counters + (machine -> amount |+| counters.getOrElse(machine, m.empty))
+  }
+
+  def merge(that: GCounter[A])(implicit b: BoundedSemiLattice[A]): GCounter[A] =
+    GCounter(counters |+| that.counters)
+    //GCounter { counters ++ that.counters.map {
+    //  case (k, v) => k -> v |+| counters.getOrElse(k, b.empty)
+    //}}
+
+  def total(implicit m: Monoid[A]): A = counters.values.toList.combineAll
+}
+```
