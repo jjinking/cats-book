@@ -1242,4 +1242,20 @@ Eventual consistency
 - Low latency - less communication between machines
 - High availability - machines will still accept updates even during network partition, and reconcile changes when network is back up
 
+**GCounter**
+```scala
+final case class GCounter(counters: Map[String, Int]) {
+  def increment(machine: String, amount: Int): GCounter = GCounter {
+    counters + (machine -> amount + counters.getOrElse(machine, 0))
+  }
+
+  def merge(that: GCounter): GCounter =
+    GCounter { counters ++ that.counters.map {
+      case (k, v) => k -> v max counters.getOrElse(k, 0)
+    }}
+
+  def total: Int =
+    counters.values.sum
+}
+```
 
